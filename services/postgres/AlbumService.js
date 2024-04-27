@@ -4,7 +4,7 @@ const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const { mapDBToModel } = require('../../utils');
 
-class NotesService {
+class AlbumService {
   constructor() {
     this._pool = new Pool();
   }
@@ -13,7 +13,7 @@ class NotesService {
     const id = nanoid(16);
 
     const query = {
-      text: 'INSERT INTO song VALUES($1, $2, $3) RETURNING id',
+      text: 'INSERT INTO album VALUES($1, $2, $3) RETURNING id',
       values: [id, name, year],
     };
 
@@ -33,7 +33,24 @@ class NotesService {
 
   async getAlbumById(id) {
     const query = {
-      text: 'SELECT * FROM album WHERE id = $1',
+      // text: 'SELECT * FROM "album" as a LEFT JOIN "song" as s on s."album_id"=a."id" WHERE a.id = $1 GROUP BY a.id, 1',
+      // text: 'SELECT * FROM "album" WHERE id = $1',
+      // text: 'SELECT a.*, ARRAY_AGG(s.*) AS songs FROM album AS a LEFT JOIN song AS s ON s.album_id = a.id WHERE a.id = $1 GROUP BY a.id',
+      text: `
+      SELECT 
+        a.*, 
+          (
+            SELECT 
+              json_agg(s)
+            FROM 
+              song AS s 
+            WHERE 
+              s.album_id = a.id
+          ) AS songs
+      FROM 
+        album AS a 
+      WHERE 
+        a.id = $1;`,
       values: [id],
     };
     const result = await this._pool.query(query);
@@ -42,12 +59,15 @@ class NotesService {
       throw new NotFoundError('Album tidak ditemukan');
     }
 
-    return result.rows.map(mapDBToModel)[0];
+    return {
+      ...result.rows[0],
+      songs: result.rows[0].songs || []
+    };
   }
 
   async editAlbumById(id, { name, year }) {
     const query = {
-      text: 'UPDATE album SET name = $1, year = $2, WHERE id = $3 RETURNING id',
+      text: 'UPDATE album SET name = $1, year = $2 WHERE id = $3 RETURNING id',
       values: [name, year, id],
     };
 
@@ -72,4 +92,4 @@ class NotesService {
   }
 }
 
-module.exports = NotesService;
+module.exports = AlbumService;

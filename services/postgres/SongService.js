@@ -14,7 +14,7 @@ class NotesService {
 
     const query = {
       text: 'INSERT INTO song VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id',
-      values: [id, title, year, genre, performer, duration, albumId],
+      values: [id, title, year, performer, genre, duration, albumId],
     };
 
     const result = await this._pool.query(query);
@@ -26,8 +26,27 @@ class NotesService {
     return result.rows[0].id;
   }
 
-  async getSongs() {
-    const result = await this._pool.query('SELECT * FROM song');
+  async getSongs({ title = undefined, performer = undefined }) {
+    let query = 'SELECT * FROM song';
+    let values = [];
+
+    if (title || performer) {
+      query += ' WHERE';
+
+      if (title && !performer) {
+        query += ' title ILIKE $1';
+        values.push(`%${title}%`)
+      } else if (performer && !title) {
+        query += ' performer ILIKE $1';
+        values.push(`%${performer}%`)
+      } else {
+        query += ' title ILIKE $1 AND performer ILIKE $2';
+        values.push(`%${title}%`, `%${performer}%`)
+      }
+    }
+    console.log({query, values})
+    const result = await this._pool.query(query, values);
+    console.log({result: result.rows[0]})
     return result.rows.map(mapDBToModel);
   }
 
@@ -42,12 +61,12 @@ class NotesService {
       throw new NotFoundError('Lagu tidak ditemukan');
     }
 
-    return result.rows.map(mapDBToModel)[0];
+    return result.rows[0];
   }
 
   async editSongById(id, { title, year, genre, performer, duration, albumId }) {
     const query = {
-      text: 'UPDATE song SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, albumId = $6, WHERE id = $7 RETURNING id',
+      text: 'UPDATE song SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, album_id = $6 WHERE id = $7 RETURNING id',
       values: [title, year, genre, performer, duration, albumId, id],
     };
 
