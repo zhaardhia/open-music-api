@@ -1,0 +1,4 @@
+node_modules
+open-music-web-server.pem
+.env
+.prod.env
