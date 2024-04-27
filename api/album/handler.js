@@ -11,13 +11,13 @@ class AlbumHandler {
     this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this);
     this.putAlbumByIdHandler = this.putAlbumByIdHandler.bind(this);
     this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this);
-  };
+  }
 
   async postAlbumHandler(request, h) {
     try {
       this._validator.validateAlbumPayload(request.payload);
-      const {name = 'untitled', year} = request.payload;
-      const albumId = await this._service.addAlbum({name, year});
+      const { name = 'untitled', year } = request.payload;
+      const albumId = await this._service.addAlbum({ name, year });
 
       const response = h.response({
         status: 'success',
@@ -37,7 +37,7 @@ class AlbumHandler {
         response.code(400);
 
         return response;
-      };
+      }
 
       // Server ERROR!
       const response = h.response({
@@ -48,12 +48,12 @@ class AlbumHandler {
       console.error(error);
 
       return response;
-    };
-  };
+    }
+  }
 
   async getAlbumByIdHandler(request, h) {
     try {
-      const {id} = request.params;
+      const { id } = request.params;
       const album = await this._service.getAlbumById(id);
 
       return {
@@ -71,7 +71,7 @@ class AlbumHandler {
         response.code(404);
 
         return response;
-      };
+      }
 
       // Server ERROR!
       const response = h.response({
@@ -82,13 +82,13 @@ class AlbumHandler {
       console.error(error);
 
       return response;
-    };
-  };
+    }
+  }
 
   async putAlbumByIdHandler(request, h) {
     try {
       this._validator.validateAlbumPayload(request.payload);
-      const {id} = request.params;
+      const { id } = request.params;
       await this._service.editAlbumById(id, request.payload);
 
       return {
@@ -112,7 +112,7 @@ class AlbumHandler {
         response.code(404);
 
         return response;
-      };
+      }
 
       // Server ERROR!
       const response = h.response({
@@ -123,11 +123,12 @@ class AlbumHandler {
       console.error(error);
 
       return response;
-    };
-  };
+    }
+  }
+
   async deleteAlbumByIdHandler(request, h) {
     try {
-      const {id} = request.params;
+      const { id } = request.params;
       await this._service.deleteAlbumById(id);
 
       return {
@@ -143,7 +144,7 @@ class AlbumHandler {
         response.code(404);
 
         return response;
-      };
+      }
 
       // Server ERROR!
       const response = h.response({
@@ -154,8 +155,8 @@ class AlbumHandler {
       console.error(error);
 
       return response;
-    };
-  };
-};
+    }
+  }
+}
 
 module.exports = AlbumHandler;

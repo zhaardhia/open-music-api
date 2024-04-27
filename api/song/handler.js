@@ -38,7 +38,7 @@ class SongHandler {
         response.code(400);
 
         return response;
-      };
+      }
 
       // Server ERROR!
       const response = h.response({
@@ -49,12 +49,14 @@ class SongHandler {
       console.error(error);
 
       return response;
-    };
-  };
+    }
+  }
 
   async getSongsHandler(request) {
     const params = request.query;
-    const songs = await this._service.getSongs({ title: params?.title, performer: params?.performer });
+    const songs = await this._service.getSongs({
+      title: params?.title, performer: params?.performer,
+    });
 
     return {
       status: 'success',
@@ -62,11 +64,11 @@ class SongHandler {
         songs,
       },
     };
-  };
+  }
 
   async getSongByIdHandler(request, h) {
     try {
-      const {id} = request.params;
+      const { id } = request.params;
       const song = await this._service.getSongById(id);
 
       return {
@@ -84,7 +86,7 @@ class SongHandler {
         response.code(404);
 
         return response;
-      };
+      }
 
       // Server ERROR!
       const response = h.response({
@@ -95,13 +97,13 @@ class SongHandler {
       console.error(error);
 
       return response;
-    };
-  };
+    }
+  }
 
   async putSongByIdHandler(request, h) {
     try {
       this._validator.validateSongPayload(request.payload);
-      const {id} = request.params;
+      const { id } = request.params;
       await this._service.editSongById(id, request.payload);
 
       return {
@@ -125,7 +127,7 @@ class SongHandler {
         response.code(400);
 
         return response;
-      };
+      }
 
       // Server ERROR!
       const response = h.response({
@@ -136,12 +138,12 @@ class SongHandler {
       console.error(error);
 
       return response;
-    };
-  };
+    }
+  }
 
   async deleteSongByIdHandler(request, h) {
     try {
-      const {id} = request.params;
+      const { id } = request.params;
       await this._service.deleteSongById(id);
 
       return {
@@ -157,7 +159,7 @@ class SongHandler {
         response.code(404);
 
         return response;
-      };
+      }
 
       // Server ERROR!
       const response = h.response({
@@ -168,8 +170,8 @@ class SongHandler {
       console.error(error);
 
       return response;
-    };
-  };
-};
+    }
+  }
+}
 
 module.exports = SongHandler;

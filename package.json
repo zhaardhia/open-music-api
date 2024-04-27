@@ -7,6 +7,7 @@
     "start-prod": "NODE_ENV=production node ./src/server.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
     "migrate": "node-pg-migrate"
   },
   "author": "",
@@ -20,9 +21,13 @@
     "pg": "^8.11.5"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.24.1",
+    "@eslint/eslintrc": "^3.0.2",
+    "@eslint/js": "^9.1.1",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.29.1",
+    "globals": "^15.0.0",
     "nodemon": "^3.1.0"
   }
 }

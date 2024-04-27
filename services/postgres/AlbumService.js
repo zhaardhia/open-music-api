@@ -33,9 +33,6 @@ class AlbumService {
 
   async getAlbumById(id) {
     const query = {
-      // text: 'SELECT * FROM "album" as a LEFT JOIN "song" as s on s."album_id"=a."id" WHERE a.id = $1 GROUP BY a.id, 1',
-      // text: 'SELECT * FROM "album" WHERE id = $1',
-      // text: 'SELECT a.*, ARRAY_AGG(s.*) AS songs FROM album AS a LEFT JOIN song AS s ON s.album_id = a.id WHERE a.id = $1 GROUP BY a.id',
       text: `
       SELECT 
         a.*, 
@@ -61,7 +58,7 @@ class AlbumService {
 
     return {
       ...result.rows[0],
-      songs: result.rows[0].songs || []
+      songs: result.rows[0].songs || [],
     };
   }
 

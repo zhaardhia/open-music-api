@@ -9,7 +9,9 @@ class NotesService {
     this._pool = new Pool();
   }
 
-  async addSong({ title, year, genre, performer, duration, albumId }) {
+  async addSong({
+    title, year, genre, performer, duration, albumId,
+  }) {
     const id = nanoid(16);
 
     const query = {
@@ -28,20 +30,20 @@ class NotesService {
 
   async getSongs({ title = undefined, performer = undefined }) {
     let query = 'SELECT * FROM song';
-    let values = [];
+    const values = [];
 
     if (title || performer) {
       query += ' WHERE';
 
       if (title && !performer) {
         query += ' title ILIKE $1';
-        values.push(`%${title}%`)
+        values.push(`%${title}%`);
       } else if (performer && !title) {
         query += ' performer ILIKE $1';
-        values.push(`%${performer}%`)
+        values.push(`%${performer}%`);
       } else {
         query += ' title ILIKE $1 AND performer ILIKE $2';
-        values.push(`%${title}%`, `%${performer}%`)
+        values.push(`%${title}%`, `%${performer}%`);
       }
     }
 
@@ -63,7 +65,9 @@ class NotesService {
     return result.rows[0];
   }
 
-  async editSongById(id, { title, year, genre, performer, duration, albumId }) {
+  async editSongById(id, {
+    title, year, genre, performer, duration, albumId,
+  }) {
     const query = {
       text: 'UPDATE song SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, album_id = $6 WHERE id = $7 RETURNING id',
       values: [title, year, genre, performer, duration, albumId, id],

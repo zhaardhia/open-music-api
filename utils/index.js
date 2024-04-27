@@ -1,4 +1,4 @@
-const mapDBToModel = ({ 
+module.exports.mapDBToModel = ({
   id,
   title,
   performer,
@@ -7,5 +7,3 @@ const mapDBToModel = ({
   title,
   performer,
 });
-
-module.exports = { mapDBToModel };

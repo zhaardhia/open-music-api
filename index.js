@@ -8,6 +8,7 @@ const SongService = require('./services/postgres/SongService');
 const AlbumService = require('./services/postgres/AlbumService');
 const AlbumsValidator = require('./validator/album');
 const SongsValidator = require('./validator/song');
+const { ClientError } = require('./exceptions/ClientError');
 
 const init = async () => {
   const songService = new SongService();
@@ -35,6 +36,35 @@ const init = async () => {
       service: albumService,
       validator: AlbumsValidator,
     },
+  });
+
+  server.ext('onPreResponse', (request, h) => {
+    const { response } = request;
+
+    if (response instanceof Error) {
+      if (response instanceof ClientError) {
+        const newResponse = h.response({
+          status: 'fail',
+          message: response.message,
+        });
+
+        newResponse.code(response.statusCode);
+        return newResponse;
+      }
+
+      if (!response.isServer) {
+        return h.continue;
+      }
+
+      const newResponse = h.response({
+        status: 'error',
+        message: 'There is error on server',
+      });
+
+      newResponse.code(500);
+      return newResponse;
+    }
+    return h.continue;
   });
 
   await server.start();
