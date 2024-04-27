@@ -55,7 +55,7 @@ class SongHandler {
   async getSongsHandler(request) {
     const params = request.query;
     const songs = await this._service.getSongs({ title: params?.title, performer: params?.performer });
-    console.log({params: params.title})
+
     return {
       status: 'success',
       data: {
@@ -100,9 +100,7 @@ class SongHandler {
 
   async putSongByIdHandler(request, h) {
     try {
-      console.log({request: request.payload})
       this._validator.validateSongPayload(request.payload);
-      console.log("hehe")
       const {id} = request.params;
       await this._service.editSongById(id, request.payload);
 

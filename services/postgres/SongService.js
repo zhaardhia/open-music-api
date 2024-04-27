@@ -44,9 +44,8 @@ class NotesService {
         values.push(`%${title}%`, `%${performer}%`)
       }
     }
-    console.log({query, values})
+
     const result = await this._pool.query(query, values);
-    console.log({result: result.rows[0]})
     return result.rows.map(mapDBToModel);
   }
 
