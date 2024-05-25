@@ -106,7 +106,7 @@ const init = async () => {
         authenticationsService: authenticationService,
         usersService: userService,
         tokenManager: TokenManager,
-        validator: AuthenticationsValidator
+        validator: AuthenticationsValidator,
       },
     },
   ]);

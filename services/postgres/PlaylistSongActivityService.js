@@ -30,7 +30,7 @@ class PlaylistSongsActivitiesService {
     };
 
     const result = await this._pool.query(query);
-
+    result.rows = result.rows.sort((a, b) => new Date(a.time) - new Date(b.time));
     return {
       playlistId, activities: result.rows,
     };
