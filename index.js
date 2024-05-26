@@ -3,6 +3,8 @@ require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
+const Inert = require('@hapi/inert');
+const path = require('path');
 
 const song = require('./api/song');
 const album = require('./api/album');
@@ -12,6 +14,9 @@ const playlist = require('./api/playlist');
 const playlistSong = require('./api/playlist-song');
 const playlistSongActivity = require('./api/playlist-song-activity');
 const collaboration = require('./api/collaboration');
+const _exports = require('./api/exports');
+const uploads = require('./api/upload');
+const userAlbumLikes = require('./api/userAlbumLikes');
 
 const SongService = require('./services/postgres/SongService');
 const AlbumService = require('./services/postgres/AlbumService');
@@ -21,6 +26,10 @@ const PlaylistService = require('./services/postgres/PlaylistService');
 const PlaylistSongService = require('./services/postgres/PlaylistSongService');
 const PlaylistSongActivityService = require('./services/postgres/PlaylistSongActivityService');
 const CollaborationService = require('./services/postgres/CollaborationService');
+const ProducerService = require('./services/rabbitmq/ProducerService');
+const StorageService = require('./services/storage/StorageService');
+const UserAlbumLikesService = require('./services/postgres/UserAlbumLikesService');
+const CacheService = require('./services/redis/CacheService');
 
 const AlbumsValidator = require('./validator/album');
 const SongsValidator = require('./validator/song');
@@ -29,6 +38,8 @@ const AuthenticationsValidator = require('./validator/authentication');
 const PlaylistValidator = require('./validator/playlist');
 const PlaylistSongsValidator = require('./validator/playlist-song');
 const CollaborationValidator = require('./validator/collaboration');
+const ExportsValidator = require('./validator/exports');
+const UploadsValidator = require('./validator/uploads');
 
 const TokenManager = require('./tokenize/TokenManager');
 
@@ -43,6 +54,9 @@ const init = async () => {
   const playlistService = new PlaylistService(collaborationService);
   const playlistSongService = new PlaylistSongService();
   const playlistSongActivityService = new PlaylistSongActivityService();
+  const storageService = new StorageService(path.resolve(__dirname, 'api/upload/file/cover'));
+  const cacheService = new CacheService();
+  const userAlbumLikesService = new UserAlbumLikesService(cacheService);
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -57,6 +71,9 @@ const init = async () => {
   await server.register([
     {
       plugin: Jwt,
+    },
+    {
+      plugin: Inert,
     },
   ]);
 
@@ -76,21 +93,21 @@ const init = async () => {
     }),
   });
 
-  await server.register({
-    plugin: song,
-    options: {
-      service: songService,
-      validator: SongsValidator,
-    },
-  });
-  await server.register({
-    plugin: album,
-    options: {
-      service: albumService,
-      validator: AlbumsValidator,
-    },
-  });
   await server.register([
+    {
+      plugin: song,
+      options: {
+        service: songService,
+        validator: SongsValidator,
+      },
+    },
+    {
+      plugin: album,
+      options: {
+        service: albumService,
+        validator: AlbumsValidator,
+      },
+    },
     {
       plugin: user,
       options: {
@@ -98,8 +115,6 @@ const init = async () => {
         validator: UserValidator,
       },
     },
-  ]);
-  await server.register([
     {
       plugin: authentication,
       options: {
@@ -109,9 +124,6 @@ const init = async () => {
         validator: AuthenticationsValidator,
       },
     },
-  ]);
-
-  await server.register([
     {
       plugin: playlist,
       options: {
@@ -119,8 +131,6 @@ const init = async () => {
         validator: PlaylistValidator,
       },
     },
-  ]);
-  await server.register([
     {
       plugin: playlistSong,
       options: {
@@ -131,8 +141,6 @@ const init = async () => {
         validator: PlaylistSongsValidator,
       },
     },
-  ]);
-  await server.register([
     {
       plugin: playlistSongActivity,
       options: {
@@ -140,8 +148,6 @@ const init = async () => {
         playlistSongsActivitiesService: playlistSongActivityService,
       },
     },
-  ]);
-  await server.register([
     {
       plugin: collaboration,
       options: {
@@ -149,6 +155,29 @@ const init = async () => {
         playlistService,
         usersService: userService,
         validator: CollaborationValidator,
+      },
+    },
+    {
+      plugin: _exports,
+      options: {
+        producerService: ProducerService,
+        playlistService,
+        validator: ExportsValidator,
+      },
+    },
+    {
+      plugin: uploads,
+      options: {
+        storageService,
+        albumService,
+        validator: UploadsValidator,
+      },
+    },
+    {
+      plugin: userAlbumLikes,
+      options: {
+        userAlbumLikesService,
+        albumService,
       },
     },
   ]);
